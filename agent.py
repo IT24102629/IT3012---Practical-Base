@@ -1,5 +1,6 @@
 from collections import deque
 import heapq
+import math
 
 
 class SearchAgent:
@@ -7,7 +8,7 @@ class SearchAgent:
     def __init__(self):
 
         self.plan = []
-        self.active_algo = 'BFS'
+        self.active_algo = 'AStar'
 
         self.position = (0, 0)
         self.facing = 'Right'
@@ -99,6 +100,22 @@ class SearchAgent:
         return valid_neighbors
 
 
+    def manhattan_distance(self, pos, goal):
+
+        x1, y1 = pos
+        x2, y2 = goal
+
+        return abs(x1 - x2) + abs(y1 - y2)
+
+
+    def euclidean_distance(self, pos, goal):
+
+        x1, y1 = pos
+        x2, y2 = goal
+
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+
     def bfs_search(self, start, goal, grid_size, walls):
 
         frontier = deque([(start, [])])
@@ -162,6 +179,54 @@ class SearchAgent:
 
                 if new_state not in reached:
                     heapq.heappush(frontier, (cost + 1, new_state, path + [action]))
+
+        return []
+
+
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan'):
+
+        frontier = []
+        reached_states = set()
+
+        if heuristic_type == 'euclidean':
+            h_cost = self.euclidean_distance(start_pos, goal_pos)
+        else:
+            h_cost = self.manhattan_distance(start_pos, goal_pos)
+
+        g_cost = 0
+        f_cost = g_cost + h_cost
+
+        heapq.heappush(frontier, (f_cost, g_cost, start_pos, []))
+
+        while frontier:
+
+            f_cost, g_cost, current_pos, path_taken = heapq.heappop(frontier)
+
+            if current_pos in reached_states:
+                continue
+
+            if current_pos == goal_pos:
+                return path_taken
+
+            reached_states.add(current_pos)
+
+            for action, new_state in self.get_neighbors(current_pos, grid_size, walls):
+
+                if new_state not in reached_states:
+
+                    new_g_cost = g_cost + 1
+
+                    if heuristic_type == 'euclidean':
+                        new_h_cost = self.euclidean_distance(new_state, goal_pos)
+                    else:
+                        new_h_cost = self.manhattan_distance(new_state, goal_pos)
+
+                    new_f_cost = new_g_cost + new_h_cost
+
+                    heapq.heappush(
+                        frontier,
+                        (new_f_cost, new_g_cost, new_state, path_taken + [action])
+                    )
 
         return []
 
@@ -242,6 +307,9 @@ class SearchAgent:
                 elif self.active_algo == 'UCS':
                     directions = self.ucs_search(start, goal, grid_size, walls)
 
+                elif self.active_algo == 'AStar':
+                    directions = self.astar_search(start, goal, walls, grid_size)
+
                 else:
                     directions = self.bfs_search(start, goal, grid_size, walls)
 
@@ -255,3 +323,10 @@ class SearchAgent:
         self.last_action = action
 
         return action
+if __name__ == "__main__":
+
+     agent = SearchAgent()
+
+     print("Manhattan Distance:", agent.manhattan_distance((0, 0), (3, 4)))
+     print("Euclidean Distance:", agent.euclidean_distance((0, 0), (3, 4)))
+    

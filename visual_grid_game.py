@@ -474,7 +474,7 @@ class GridGameGUI:
         self.root = root
 
         self.root.title(
-            "IT3012 - Practical 03 Search Agent"
+            "IT3012 - Practical 04 A* Search Agent"
         )
 
     
