@@ -2,6 +2,7 @@
 
 import random
 import tkinter as tk
+from agent import SearchAgent
 
 
 
@@ -121,7 +122,10 @@ class VisualGridHuntGame:
         return {
             'wall_ahead': wall_ahead,
             'food_here': tuple(self.agent_pos) in self.food_positions,
-            'toxin_here': tuple(self.agent_pos) in self.toxic_traps
+            'toxin_here': tuple(self.agent_pos) in self.toxic_traps,
+            'grid_size': (self.width, self.height),
+            'walls': list(self.walls),
+            'all_food': list(self.food_positions)
         }
 
 
@@ -470,7 +474,7 @@ class GridGameGUI:
         self.root = root
 
         self.root.title(
-            "IT3012 - Practical 02 Agent Architectures"
+            "IT3012 - Practical 03 Search Agent"
         )
 
     
@@ -486,9 +490,13 @@ class GridGameGUI:
             self.agent = SimpleReflexAgent()
             self.agent_name = "Simple Reflex Agent"
 
-        else:
+        elif agent_type == 'model':
             self.agent = ModelBasedAgent()
             self.agent_name = "Model-Based Agent"
+
+        else:
+            self.agent = SearchAgent()
+            self.agent_name = f"Search Agent ({self.agent.active_algo})"
 
 
         max_canvas_dim = 600
@@ -794,7 +802,7 @@ if __name__ == "__main__":
         height=12,
         num_food=15,
         num_opponents=0,
-        agent_type='model'
+        agent_type='search'
     )
 
     root.mainloop()
